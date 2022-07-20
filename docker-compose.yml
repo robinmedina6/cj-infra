@@ -1,0 +1,46 @@
+version: '3.1'
+
+services:
+
+  cj-db:
+    container_name: cj-db
+    image: postgres:alpine
+    restart: unless-stopped
+    environment:
+      TZ: America/Bogota
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_DB: cronojava
+    ports:
+      - 5432:5432
+    volumes:
+      - db:/var/lib/postgresql/data
+
+  cj-ad:
+    container_name: cj-ad
+    image: adminer
+    restart: unless-stopped
+    environment:
+      - TZ=America/Bogota
+    depends_on:
+      - cj-db
+    ports:
+      - 2082:8080
+      
+  cj-spb:
+    container_name: cj-spb
+    build: ./cj-spb/
+    volumes:
+        - cj-spb-data:/cj-spb
+    environment:
+      - TZ=America/Bogota
+    links:
+      - cj-db
+    restart: always
+    ports:
+      - 2080:8080
+
+volumes:
+  db:
+    driver: local
+  cj-spb-data: {}
